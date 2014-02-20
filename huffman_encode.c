@@ -16,6 +16,8 @@ typedef struct entry_tag {
 
 entry *head = NULL;
 entry *root = NULL;
+unsigned char buffer = 0;
+int buffer_fill_count = 0;
 
 // Sorted Insert
 void create_entry(unsigned char val) {
@@ -146,8 +148,6 @@ void build_tree() {
 
 	while(head->fwd != NULL) {
 
-		print_list();
-
 		entry *left_node = pop_head();
 		entry *right_node = pop_head();
 
@@ -161,8 +161,6 @@ void build_tree() {
 
 		insert_entry(parent_node);
 	}
-
-	print_list();
 	root = pop_head();
 }
 
@@ -200,11 +198,16 @@ int main(int argc, char **argv) {
 		}
 
 		if(rover == NULL) create_entry(val);
-
 	}
 
 	list_sort_by_freq();
 	build_tree();
+
+	rewind(fpIn);
+
+	while(fread(&val, sizeof(val), 1, fpIn) == 1) {
+
+	}
 
 	fclose(fpIn);
 	fclose(fpOut);
