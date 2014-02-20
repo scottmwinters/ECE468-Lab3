@@ -7,27 +7,28 @@
 #define MAX_STRING_LEN 255
 
 typedef struct entry_tag {
-	unsigned char val;
+	unsigned char *val;
 	int freq;
 	struct entry_tag *fwd;
+	struct entry_tag *left;
+	struct entry_tag *right;
 } entry;
 
-typedef struct node_tag {
-	entry *entry; 
-	struct node_tag *left;
-	struct node_tag *right;
-} node;
-
 entry *head = NULL;
+entry *root = NULL;
 
 // Sorted Insert
 void create_entry(unsigned char val) {
 
 	entry *current = calloc(sizeof(*current), 1);
 
-	current->val = val;
+	current->val = calloc(sizeof(*current->val), 1);
+
+	*current->val = val;
 	current->freq = 1;
 	current->fwd = NULL;
+	current->left = NULL;
+	current->right = NULL;
 
 	if(head == NULL) {
 		head = current;
@@ -35,7 +36,7 @@ void create_entry(unsigned char val) {
 
 		entry *rover = head;
 
-		if(val < head->val) {
+		if(val < *head->val) {
 			current->fwd = head;
 			head = current;
 		} else {
@@ -45,7 +46,7 @@ void create_entry(unsigned char val) {
 
 			while(rover != NULL) {
 		
-				if(val > previous->val && val < rover->val) {
+				if(val > *previous->val && val < *rover->val) {
 					current->fwd = rover;
 					previous->fwd = current;
 					break;
@@ -75,16 +76,14 @@ void list_sort_by_freq() {
 
 		do {
 			if(current->freq > next->freq) {
-				entry *temp = calloc(sizeof(*temp), 1);
+				unsigned char tempVal = *current->val;
+				int tempFreq = current->freq;
 				
-				temp->val = current->val;
-				temp->freq = current->freq;
-
-				current->val = next->val;
+				*current->val = *next->val;
 				current->freq = next->freq;
 
-				next->val = temp->val;
-				next->freq = temp->freq;
+				*next->val = tempVal;
+				next->freq = tempFreq;
 
 				sorted = 1;
 			}
@@ -98,9 +97,73 @@ void list_sort_by_freq() {
 void print_list() {
 	entry *rover = head;
 	while(rover != NULL) {
-		printf("%d : %d\n", rover->val, rover->freq);
+		if(rover->val != NULL) printf("%d : %d\n", rover->freq, *rover->val);
+		else printf("%d : * \n", rover->freq);
 		rover = rover->fwd;
 	}
+
+	printf("\n");
+}
+
+entry *pop_head() {
+	entry *temp = head;
+	if(head->fwd != NULL) head = head->fwd;
+	else head = NULL;
+	return temp;
+}
+
+void insert_entry(entry *new) {
+
+	if(head == NULL) head = new;
+	else {
+
+		if(new->freq <= head->freq) {
+			new->fwd = head;
+			head = new;
+		} else {
+
+			entry *current = head;
+			entry *next = head->fwd;
+
+			while(next != NULL) {
+
+				if(new->freq > current->freq && new->freq <= next->freq) {
+					new->fwd = next;
+					current->fwd = new;
+					break;
+				}
+
+				current = next;
+				next = next->fwd;
+			}
+
+			if(next == NULL) current->fwd = new;
+		}
+	}
+}
+
+void build_tree() {
+
+	while(head->fwd != NULL) {
+
+		print_list();
+
+		entry *left_node = pop_head();
+		entry *right_node = pop_head();
+
+		entry *parent_node = calloc(sizeof(*parent_node), 1);
+
+		parent_node->val = NULL;
+		parent_node->freq = left_node->freq + right_node->freq;
+		parent_node->fwd = NULL;
+		parent_node->left = left_node;
+		parent_node->right = right_node;
+
+		insert_entry(parent_node);
+	}
+
+	print_list();
+	root = pop_head();
 }
 
 int main(int argc, char **argv) {
@@ -129,7 +192,7 @@ int main(int argc, char **argv) {
 
 		entry *rover = head;
 		while(rover != NULL) {
-			if(rover->val == val) {
+			if(*rover->val == val) {
 				rover->freq++;
 				break;
 			} 
@@ -141,8 +204,7 @@ int main(int argc, char **argv) {
 	}
 
 	list_sort_by_freq();
-	print_list();
-	
+	build_tree();
 
 	fclose(fpIn);
 	fclose(fpOut);
