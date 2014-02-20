@@ -60,6 +60,48 @@ void create_entry(unsigned char val) {
 	}
 }
 
+void list_sort_by_freq() {
+
+	if(head->fwd == NULL) return;
+
+	int sorted = 0;
+
+	do {
+
+		entry *current = head;
+		entry *next = head->fwd;
+		
+		sorted = 0;
+
+		do {
+			if(current->freq > next->freq) {
+				entry *temp = calloc(sizeof(*temp), 1);
+				
+				temp->val = current->val;
+				temp->freq = current->freq;
+
+				current->val = next->val;
+				current->freq = next->freq;
+
+				next->val = temp->val;
+				next->freq = temp->freq;
+
+				sorted = 1;
+			}
+
+			current = next;
+			next = next->fwd;
+		} while(next != NULL);
+	} while(sorted);
+}
+
+void print_list() {
+	entry *rover = head;
+	while(rover != NULL) {
+		printf("%d : %d\n", rover->val, rover->freq);
+		rover = rover->fwd;
+	}
+}
 
 int main(int argc, char **argv) {
 
@@ -98,11 +140,9 @@ int main(int argc, char **argv) {
 
 	}
 
-	entry *rover = head;
-	while(rover != NULL) {
-		printf("%d : %d\n", rover->val, rover->freq);
-		rover = rover->fwd;
-	}
+	list_sort_by_freq();
+	print_list();
+	
 
 	fclose(fpIn);
 	fclose(fpOut);
