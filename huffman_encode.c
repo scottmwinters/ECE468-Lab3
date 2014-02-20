@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 
@@ -14,8 +15,12 @@ typedef struct entry_tag {
 	struct entry_tag *right;
 } entry;
 
+FILE *fpIn = NULL;
+FILE *fpOut = NULL;
+
 entry *head = NULL;
 entry *root = NULL;
+
 unsigned char buffer = 0;
 int buffer_fill_count = 0;
 
@@ -164,6 +169,52 @@ void build_tree() {
 	root = pop_head();
 }
 
+void print_node(entry *node) {
+
+	printf("Node Properties:\n\t");
+	if(node != NULL) {
+		if(node->val != NULL) printf("%d\t:\t%d\n", node->freq, *node->val);
+		else printf("%d\t:\t*\n", node->freq);
+	} else {
+		printf("Nodes is empty\n");
+	}
+}
+
+
+bool output_huffman_code(unsigned char val, entry *node) {
+
+	// printf("buffer count = %d\n", buffer_fill_count);
+	// print_node(node);
+
+	if(node == NULL) return false; // Didnt find it
+
+	// Output the buffer if its full
+	if(buffer_fill_count == 8) {
+		fwrite(&buffer, sizeof(buffer), 1, fpOut);
+		buffer = 0;
+		buffer_fill_count = 0;
+	}
+
+	if(node->val != NULL && *node->val == val) return true;
+
+	if(output_huffman_code(val, node->left)) {
+		// printf("Left had it\n");
+		printf("0");
+		buffer |= 0 << (7 - buffer_fill_count);
+		buffer_fill_count++;
+		return true;
+	} else if(output_huffman_code(val, node->right)) {
+		// printf("right had it\n");
+		printf("1");
+		buffer |= 1 << (7 - buffer_fill_count);
+		buffer_fill_count++;
+		return true;
+	}
+	
+	else return false; 
+
+}
+
 int main(int argc, char **argv) {
 
 	assert(argc == 2);
@@ -174,9 +225,6 @@ int main(int argc, char **argv) {
 	// Create Output File
 	strcpy(outputFile, inputFile);
 	strcat(outputFile, ".huff");
-
-	FILE *fpIn = NULL;
-	FILE *fpOut = NULL;
 
 	fpIn = fopen(inputFile, "rb");
 	fpOut = fopen(outputFile, "wb");
@@ -207,7 +255,14 @@ int main(int argc, char **argv) {
 
 	while(fread(&val, sizeof(val), 1, fpIn) == 1) {
 
+		// printf("searching for %d\n", val);
+	 	assert(output_huffman_code(val, root) == true);
+
 	}
+
+	printf("\n%x\n", buffer);
+	// buffer = buffer << (7 - buffer_fill_count);
+ 	fwrite(&buffer, sizeof(buffer), 1, fpOut);
 
 	fclose(fpIn);
 	fclose(fpOut);
