@@ -6,6 +6,11 @@
 
 #include "huffman.h"
 
+FILE *fpIn = NULL;
+FILE *fpOut = NULL;
+entry *head = NULL;
+entry *root = NULL;
+
 int main(int argc, char **argv) {
 
 	assert(argc == 2);

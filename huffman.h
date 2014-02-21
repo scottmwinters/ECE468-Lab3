@@ -8,12 +8,6 @@ typedef struct entry_tag {
 	struct entry_tag *right;
 } entry;
 
-FILE *fpIn = NULL;
-FILE *fpOut = NULL;
-
-entry *head = NULL;
-entry *root = NULL;
-
 // List Managment
 void create_entry(unsigned char val);
 void insert_entry(entry *new);

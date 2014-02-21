@@ -6,6 +6,10 @@
 
 #include "huffman.h"
 
+extern FILE *fpIn;
+extern FILE *fpOut;
+extern entry *head;
+extern entry *root;
 
 void create_entry(unsigned char val) {
 
