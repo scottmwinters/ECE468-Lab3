@@ -10,6 +10,8 @@ extern FILE *fpIn;
 extern FILE *fpOut;
 extern entry *head;
 extern entry *root;
+extern unsigned char buffer;
+extern int buffer_fill_count;
 
 void create_entry(unsigned char val) {
 
@@ -169,8 +171,7 @@ void print_node(entry *node) {
 
 bool output_huffman_code(unsigned char val, entry *node) {
 
-	static unsigned char buffer = 0;
-	static int buffer_fill_count = 0;
+	
 
 	if(node == NULL) return false;
 	
@@ -179,6 +180,7 @@ bool output_huffman_code(unsigned char val, entry *node) {
 	if(output_huffman_code(val, node->left)) {
 		
 		if(buffer_fill_count == 8) {
+			printf("%x\n", buffer);
 			fwrite(&buffer, sizeof(buffer), 1, fpOut);
 			buffer = 0;
 			buffer_fill_count = 0;
@@ -186,14 +188,13 @@ bool output_huffman_code(unsigned char val, entry *node) {
 
 		buffer |= 0 << (7 - buffer_fill_count);
 		buffer_fill_count++;
-		
-		if(node == root) fwrite(&buffer, sizeof(buffer), 1, fpOut);
 
 		return true;
 	
 	} else if(output_huffman_code(val, node->right)) {
 		
 		if(buffer_fill_count == 8) {
+			printf("%x\n", buffer);
 			fwrite(&buffer, sizeof(buffer), 1, fpOut);
 			buffer = 0;
 			buffer_fill_count = 0;
@@ -201,8 +202,6 @@ bool output_huffman_code(unsigned char val, entry *node) {
 
 		buffer |= 1 << (7 - buffer_fill_count);
 		buffer_fill_count++;
-
-		if(node == root) fwrite(&buffer, sizeof(buffer), 1, fpOut);
 
 		return true;
 	}

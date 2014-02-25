@@ -10,6 +10,8 @@ FILE *fpIn = NULL;
 FILE *fpOut = NULL;
 entry *head = NULL;
 entry *root = NULL;
+unsigned char buffer = 0;
+int buffer_fill_count = 0;
 
 int main(int argc, char **argv) {
 
@@ -58,6 +60,8 @@ int main(int argc, char **argv) {
 
 	list_sort_by_freq();
 
+	print_list();
+
 	build_tree();
 
 	rewind(fpIn);
@@ -65,6 +69,8 @@ int main(int argc, char **argv) {
 	while(fread(&val, sizeof(val), 1, fpIn) == 1) {
 	 	assert(output_huffman_code(val, root) == true);
 	}
+
+	fwrite(&buffer, sizeof(buffer), 1, fpOut);
 
 	fclose(fpIn);
 	fclose(fpOut);
