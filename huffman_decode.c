@@ -84,8 +84,6 @@ int main(int argc, char **argv) {
 
 	}
 
-
-
 	fclose(fpIn);
 	fclose(fpOut);
 

@@ -54,6 +54,35 @@ void create_entry(unsigned char val) {
 		}
 	}
 }
+void insert_entry(entry *new) {
+
+	if(head == NULL) head = new;
+	else {
+
+		if(new->freq <= head->freq) {
+			new->fwd = head;
+			head = new;
+		} else {
+
+			entry *current = head;
+			entry *next = head->fwd;
+
+			while(next != NULL) {
+
+				if(new->freq > current->freq && new->freq <= next->freq) {
+					new->fwd = next;
+					current->fwd = new;
+					break;
+				}
+
+				current = next;
+				next = next->fwd;
+			}
+
+			if(next == NULL) current->fwd = new;
+		}
+	}
+}
 
 void list_sort_by_freq() {
 
@@ -88,53 +117,11 @@ void list_sort_by_freq() {
 	} while(sorted);
 }
 
-void print_list() {
-	entry *rover = head;
-	while(rover != NULL) {
-		if(rover->val != NULL) printf("%d : %d\n", rover->freq, *rover->val);
-		else printf("%d : * \n", rover->freq);
-		rover = rover->fwd;
-	}
-
-	printf("\n");
-}
-
 entry *pop_head() {
 	entry *temp = head;
 	if(head->fwd != NULL) head = head->fwd;
 	else head = NULL;
 	return temp;
-}
-
-// Keep Sorted by Frequency
-void insert_entry(entry *new) {
-
-	if(head == NULL) head = new;
-	else {
-
-		if(new->freq <= head->freq) {
-			new->fwd = head;
-			head = new;
-		} else {
-
-			entry *current = head;
-			entry *next = head->fwd;
-
-			while(next != NULL) {
-
-				if(new->freq > current->freq && new->freq <= next->freq) {
-					new->fwd = next;
-					current->fwd = new;
-					break;
-				}
-
-				current = next;
-				next = next->fwd;
-			}
-
-			if(next == NULL) current->fwd = new;
-		}
-	}
 }
 
 void build_tree() {
@@ -155,28 +142,6 @@ void build_tree() {
 		insert_entry(parent_node);
 	}
 	root = pop_head();
-}
-
-void print_node(entry *node) {
-
-	printf("Node Properties:\n\t");
-	if(node != NULL) {
-		if(node->val != NULL) printf("%d\t:\t%d\n", node->freq, *node->val);
-		else printf("%d\t:\t*\n", node->freq);
-	} else {
-		printf("Nodes is empty\n");
-	}
-}
-
-void print_sequence(sequence *head) {
-	sequence *rover = head;
-
-	while(rover != NULL) {
-		printf("%u", rover->val);
-		rover = rover->fwd;
-	}
-
-	printf("\n");
 }
 
 bool search_tree(unsigned char val, entry *node, sequence *currentSeq) {
@@ -245,4 +210,37 @@ sequence *reverse_sequence(sequence *current) {
 
 	return previous;
 
+}
+
+void print_list() {
+	entry *rover = head;
+	while(rover != NULL) {
+		if(rover->val != NULL) printf("%d : %d\n", rover->freq, *rover->val);
+		else printf("%d : * \n", rover->freq);
+		rover = rover->fwd;
+	}
+
+	printf("\n");
+}
+
+void print_sequence(sequence *head) {
+	sequence *rover = head;
+
+	while(rover != NULL) {
+		printf("%u", rover->val);
+		rover = rover->fwd;
+	}
+
+	printf("\n");
+}
+
+void print_node(entry *node) {
+
+	printf("Node Properties:\n\t");
+	if(node != NULL) {
+		if(node->val != NULL) printf("%d\t:\t%d\n", node->freq, *node->val);
+		else printf("%d\t:\t*\n", node->freq);
+	} else {
+		printf("Nodes is empty\n");
+	}
 }
