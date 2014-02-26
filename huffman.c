@@ -168,44 +168,81 @@ void print_node(entry *node) {
 	}
 }
 
+void print_sequence(sequence *head) {
+	sequence *rover = head;
 
-bool output_huffman_code(unsigned char val, entry *node) {
+	while(rover != NULL) {
+		printf("%u", rover->val);
+		rover = rover->fwd;
+	}
 
-	
+	printf("\n");
+}
+
+bool search_tree(unsigned char val, entry *node, sequence *currentSeq) {
 
 	if(node == NULL) return false;
-	
+
 	if(node->val != NULL && *node->val == val) return true;
+	 
+	if(search_tree(val, node->left, currentSeq)) {
 
-	if(output_huffman_code(val, node->left)) {
-		
-		if(buffer_fill_count == 8) {
-			printf("%x\n", buffer);
-			fwrite(&buffer, sizeof(buffer), 1, fpOut);
-			buffer = 0;
-			buffer_fill_count = 0;
-		}
+		sequence *rover = currentSeq;
 
-		buffer |= 0 << (7 - buffer_fill_count);
-		buffer_fill_count++;
+		while(rover->fwd != NULL) rover = rover->fwd;
+
+		rover->fwd = calloc(sizeof(*rover->fwd), 1);
+		rover->fwd->val = 0;
 
 		return true;
-	
-	} else if(output_huffman_code(val, node->right)) {
-		
-		if(buffer_fill_count == 8) {
-			printf("%x\n", buffer);
-			fwrite(&buffer, sizeof(buffer), 1, fpOut);
-			buffer = 0;
-			buffer_fill_count = 0;
-		}
 
-		buffer |= 1 << (7 - buffer_fill_count);
-		buffer_fill_count++;
+	} else if(search_tree(val, node->right, currentSeq)) {
+		
+		sequence *rover = currentSeq;
+
+		while(rover->fwd != NULL) rover = rover->fwd;
+
+		rover->fwd = calloc(sizeof(*rover->fwd), 1);
+		rover->fwd->val = 1;
 
 		return true;
 	}
-	
-	else return false; 
+
+	return false;
+}
+
+sequence *build_encoded_sequence(unsigned char val, entry *node) {
+
+	sequence *currentSeq = calloc(sizeof(*currentSeq), 1);
+
+	currentSeq->fwd = NULL;
+
+	search_tree(val, node, currentSeq);
+
+	currentSeq = currentSeq->fwd;
+
+	// print_sequence(currentSeq);
+
+	currentSeq = reverse_sequence(currentSeq);
+
+	return currentSeq;
+
+}
+
+sequence *reverse_sequence(sequence *current) {
+
+	sequence *previous = NULL;
+	sequence *next;
+
+	while(current != NULL) {
+
+		next = current->fwd;
+		current->fwd = previous;
+		previous = current;
+		current = next;
+
+	}
+
+	return previous;
 
 }

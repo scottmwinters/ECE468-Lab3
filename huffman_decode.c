@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
-
+#include <unistd.h>
 #include "huffman.h"
 
 FILE *fpIn = NULL;
@@ -25,9 +25,6 @@ int main(int argc, char **argv) {
 	assert(strcmp(fileExtension, ".huff") == 0);
 
 	strncpy(outputFile, inputFile, strlen(inputFile) - strlen(".huff"));
-
-	printf("%s\n", inputFile);
-	printf("%s\n", outputFile);
 
 	fpIn = fopen(inputFile, "rb");
 	fpOut = fopen(outputFile, "wb");
@@ -56,30 +53,18 @@ int main(int argc, char **argv) {
 
 	}
 
-	print_list();
-
 	list_sort_by_freq();
 
-	print_list();
-
 	build_tree();
-
-
-	// unsigned char inputBuffer;
+	
 	int writtenValues = 0;
 	entry *currentNode = root;
 	int bufferPos = 0;
-
-	printf("Number of Characters = %d\n", root->freq);
-
-	print_node(root);
-	print_node(root->right->right);
 
 	while(writtenValues < root->freq) {
 
 		if(bufferPos == 0) {
 			fread(&buffer, sizeof(buffer), 1, fpIn);
-			printf("0x%x\n", buffer);
 		}
 
 		unsigned char currentBit = 0x80;
@@ -90,8 +75,6 @@ int main(int argc, char **argv) {
 		else if(currentBit == 1) currentNode = currentNode->right; 
 
 		if(currentNode->left == NULL && currentNode->right == NULL) {
-			printf("%c\n", *currentNode->val);
-			sleep(1);
 			fwrite(currentNode->val, sizeof(*currentNode->val), 1, fpOut);
 			writtenValues++;
 			currentNode = root;

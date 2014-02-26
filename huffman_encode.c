@@ -60,17 +60,34 @@ int main(int argc, char **argv) {
 
 	list_sort_by_freq();
 
-	print_list();
-
 	build_tree();
 
 	rewind(fpIn);
 
+	buffer = 0;
+	buffer_fill_count = 0;
 	while(fread(&val, sizeof(val), 1, fpIn) == 1) {
-	 	assert(output_huffman_code(val, root) == true);
+	 	
+	 	sequence *currentSeq = build_encoded_sequence(val, root);
+	 	
+	 	sequence *rover = currentSeq;
+
+	 	while(rover != NULL) {
+
+	 		buffer |= rover->val << (7 - buffer_fill_count); // Upper Most Bit is First
+	 		buffer_fill_count = (buffer_fill_count + 1) % 8;
+
+	 		if(buffer_fill_count == 0) {
+	 			fwrite(&buffer, sizeof(buffer), 1, fpOut);
+	 			buffer = 0;
+	 		}
+
+	 		rover = rover->fwd;
+	 	}
+
 	}
 
-	fwrite(&buffer, sizeof(buffer), 1, fpOut);
+	if(buffer_fill_count != 0) fwrite(&buffer, sizeof(buffer), 1, fpOut);
 
 	fclose(fpIn);
 	fclose(fpOut);
